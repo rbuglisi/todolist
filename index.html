@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanban Drag & Drop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <center>
+    <h1>TO DO LIST</h1>
+  </center>
+  <div class="container">
+    <div class="card" id="todo" ondrop="dropHandler(event)" ondragover="dragoverHandler(event)">
+      <h4>To Do</h4>
+    </div>
+    <div class="card" id="doing" ondrop="dropHandler(event)" ondragover="dragoverHandler(event)">
+      <h4>Doing</h4>
+    </div>
+    <div class="card" id="done" ondrop="dropHandler(event)" ondragover="dragoverHandler(event)">
+      <h4>Done</h4>
+    </div>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="taskInput" placeholder="Nuova task..." />
+    <button onclick="addTask()">Aggiungi Task</button>
+  </div>
+
+  <div class="container" style="justify-content: center; margin-top: 40px;">
+    <div id="trash" ondrop="dropTrashHandler(event)" ondragover="dragoverHandler(event)">
+      <h4>Cestino</h4>
+      <p>Trascina qui per eliminare</p>
+    </div>
+  </div>
+
+
+  <script>
+    function dragstartHandler(ev) {
+      ev.dataTransfer.setData("text/plain", ev.target.id);
+    }
+
+    function dragoverHandler(ev) {
+      ev.preventDefault();
+    }
+
+    function dropHandler(ev) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData("text/plain");
+      const draggedElement = document.getElementById(data);
+      const dropTarget = ev.target.closest(".card");
+
+      if (dropTarget && draggedElement) {
+        dropTarget.appendChild(draggedElement);
+        saveBoardState();
+      }
+    }
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const value = input.value.trim();
+      if (value === "") return;
+
+      const taskId = "task_" + Date.now();
+      const task = document.createElement("div");
+      task.className = "draggable-item";
+      task.id = taskId;
+      task.draggable = true;
+      task.ondragstart = dragstartHandler;
+      task.textContent = value;
+
+      document.getElementById("todo").appendChild(task);
+      input.value = "";
+
+      saveBoardState();
+    }
+
+    function saveBoardState() {
+      const state = {
+        todo: getChildrenData("todo"),
+        doing: getChildrenData("doing"),
+        done: getChildrenData("done")
+      };
+      localStorage.setItem("kanbanState", JSON.stringify(state));
+    }
+
+    function getChildrenData(columnId) {
+      return Array.from(document.getElementById(columnId).children)
+        .filter(el => el.classList.contains("draggable-item"))
+        .map(el => ({ id: el.id, text: el.textContent }));
+    }
+
+    function loadBoardState() {
+      const savedState = JSON.parse(localStorage.getItem("kanbanState"));
+      if (!savedState) return;
+
+      for (const column in savedState) {
+        const container = document.getElementById(column);
+        savedState[column].forEach(taskData => {
+          const task = document.createElement("div");
+          task.className = "draggable-item";
+          task.id = taskData.id;
+          task.draggable = true;
+          task.ondragstart = dragstartHandler;
+          task.textContent = taskData.text;
+          container.appendChild(task);
+        });
+      }
+    }
+    function dropTrashHandler(ev) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData("text/plain");
+      const draggedElement = document.getElementById(data);
+      if (draggedElement) {
+        draggedElement.remove();
+        saveBoardState();
+      }
+    }
+
+    window.onload = loadBoardState;
+  </script>
+</body>
+
+</html>

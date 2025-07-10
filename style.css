@@ -1,0 +1,37 @@
+ .container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      padding: 30px;
+    }
+
+    .card {
+      width: 300px;
+      min-height: 400px;
+      padding: 10px;
+      border: 1px solid #aaa;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+
+    .draggable-item {
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      padding: 5px;
+      border-radius: 5px;
+      background-color: white;
+      cursor: grab;
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    #trash {
+      width: 200px;
+      height: 100px;
+      border-radius: 10px;
+      background-color: #ffdddd;
+      border-color: #ff0000;
+      text-align: center;
+    }

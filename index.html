@@ -5,13 +5,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kanban Drag & Drop</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 30px;
+    }
+
+    .card {
+      width: 300px;
+      min-height: 70px;
+      padding: 10px;
+      border: 1px solid #aaa;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+
+    .draggable-item {
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      padding: 5px;
+      border-radius: 5px;
+      background-color: white;
+      cursor: grab;
+    }
+
+    .controls {
+      text-align: left;
+      margin-top: 20px;
+      padding-left: 30px;
+    }
+  </style>
 </head>
 
 <body>
-  <center>
-    <h1>TO DO LIST</h1>
-  </center>
+  <h1 style="padding-left: 30px;">TO DO LIST</h1>
+
   <div class="container">
     <div class="card" id="todo" ondrop="dropHandler(event)" ondragover="dragoverHandler(event)">
       <h4>To Do</h4>
@@ -28,14 +59,6 @@
     <input type="text" id="taskInput" placeholder="Nuova task..." />
     <button onclick="addTask()">Aggiungi Task</button>
   </div>
-
-  <div class="container" style="justify-content: center; margin-top: 40px;">
-    <div id="trash" ondrop="dropTrashHandler(event)" ondragover="dragoverHandler(event)">
-      <h4>Cestino</h4>
-      <p>Trascina qui per eliminare</p>
-    </div>
-  </div>
-
 
   <script>
     function dragstartHandler(ev) {
@@ -69,8 +92,17 @@
       task.id = taskId;
       task.draggable = true;
       task.ondragstart = dragstartHandler;
-      task.textContent = value;
 
+      // Clic per eliminare
+      task.onclick = () => {
+        const confirmDelete = confirm("Vuoi eliminare questa task?");
+        if (confirmDelete) {
+          task.remove();
+          saveBoardState();
+        }
+      };
+
+      task.textContent = value;
       document.getElementById("todo").appendChild(task);
       input.value = "";
 
@@ -104,18 +136,19 @@
           task.id = taskData.id;
           task.draggable = true;
           task.ondragstart = dragstartHandler;
+
+          // Clic per eliminare
+          task.onclick = () => {
+            const confirmDelete = confirm("Vuoi eliminare questa task?");
+            if (confirmDelete) {
+              task.remove();
+              saveBoardState();
+            }
+          };
+
           task.textContent = taskData.text;
           container.appendChild(task);
         });
-      }
-    }
-    function dropTrashHandler(ev) {
-      ev.preventDefault();
-      const data = ev.dataTransfer.getData("text/plain");
-      const draggedElement = document.getElementById(data);
-      if (draggedElement) {
-        draggedElement.remove();
-        saveBoardState();
       }
     }
 
